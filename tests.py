@@ -103,3 +103,31 @@ def test_correct_selected_choices_returns_only_correct_ones():
     result = question.correct_selected_choices([choice1.id, choice2.id])
 
     assert result == [choice1.id]
+
+@pytest.fixture
+def question_with_choices():
+    question = Question(title='q1', max_selections=2)
+    choice_a = question.add_choice('a', is_correct=True)
+    choice_b = question.add_choice('b', is_correct=False)
+    choice_c = question.add_choice('c', is_correct=True)
+    return question, choice_a, choice_b, choice_c
+
+def test_correct_selected_choices_with_multiple_correct_selections(question_with_choices):
+    question, choice_a, choice_b, choice_c = question_with_choices
+
+    result = question.correct_selected_choices([choice_a.id, choice_c.id])
+
+    assert result == [choice_a.id, choice_c.id]
+
+def test_correct_selected_choices_excludes_incorrect_selection(question_with_choices):
+    question, choice_a, choice_b, choice_c = question_with_choices
+
+    result = question.correct_selected_choices([choice_b.id])
+
+    assert result == []
+
+def test_correct_selected_choices_raises_when_exceeding_max_selections(question_with_choices):
+    question, choice_a, choice_b, choice_c = question_with_choices
+
+    with pytest.raises(Exception):
+        question.correct_selected_choices([choice_a.id, choice_b.id, choice_c.id])
